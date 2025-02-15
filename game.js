@@ -86,10 +86,10 @@ function spawnObjects() {
 }
 
 // Function to trigger Banana API
-function triggerBananaAPI() {
+ function triggerBananaAPI() {
     gameRunning = false;
     alert("Game Over! Redirecting to Banana API...");
-    window.location.href = "https://bananaapi.com/game"; // Replace with actual API link
+    window.location.href = "https://marcconrad.com/uob/banana/"; // Replace with actual API link
 }
 
 // Game loop function
