@@ -1,6 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+
 // Game variables
 let monkey = { x: 50, y: 250, width: 50, height: 50, velocityY: 0, jumping: false };
 let bananas = [];
@@ -91,6 +92,7 @@ function spawnObjects() {
     alert("Game Over! Redirecting to Banana API...");
     window.location.href = "https://marcconrad.com/uob/banana/"; // Replace with actual API link
 }
+
 
 // Game loop function
 function gameLoop() {
