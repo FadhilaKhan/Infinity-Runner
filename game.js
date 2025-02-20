@@ -1,7 +1,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-
 // Game variables
 let monkey = { x: 50, y: 250, width: 50, height: 50, velocityY: 0, jumping: false };
 let bananas = [];
@@ -70,10 +69,8 @@ function draw() {
     ctx.fillStyle = "black";
     obstacles.forEach(obstacle => ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height));
     
-    // Draw score
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 20, 30);
+    // Update the score display
+    document.getElementById("scoreDisplay").innerText = score;
 }
 
 // Function to spawn bananas and obstacles
@@ -92,7 +89,6 @@ function spawnObjects() {
     alert("Game Over! Redirecting to Banana API...");
     window.location.href = "https://marcconrad.com/uob/banana/"; // Replace with actual API link
 }
-
 
 // Game loop function
 function gameLoop() {
