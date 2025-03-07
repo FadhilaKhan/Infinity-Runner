@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Runner</title>
+    <style>
+        canvas {
+            background: skyblue;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 1000;
+        canvas.height = 580;
+
+        let ballX = 100;
+        let ballY = 380;
+        let ballSpeed = 3; // Slower ball speed
+        let isJumping = false; // Track if the ball is in the air
+        let jumpHeight = 80; // Height of the jump
+        let jumpSpeed = 15; // Speed of the jump
+
+        // Adding more obstacles with varying positions and speeds
+        let obstacles = [
+            { x: 500, speed: 3 },
+            { x: 800, speed: 3 },
+            { x: 1200, speed: 3 },  // New obstacle 1
+            { x: 2000, speed: 3 }   // New obstacle 3
+        ];
+
+        let score = 0; // Initialize score
+        let gameOver = false; // Flag to track if the game is over
+
+        // Increment score every second (1000 milliseconds)
+        setInterval(() => {
+            if (!gameOver) {
+                score += 1; // Increase score by 1 every second
+            }
+        }, 500);
+
+        // Handle keydown events for movement
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowUp" && !isJumping && !gameOver) {
+                isJumping = true; // Start jump
+                ballY -= jumpHeight; // Jump effect
+                setTimeout(() => {
+                    ballY += jumpHeight; // Simulate gravity
+                    isJumping = false; // End jump
+                }, 300); // Gravity effect after 300ms
+            }
+        });
+
+        // Collision detection function
+        function checkCollision() {
+            // Check if the ball's position overlaps with any of the obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                let obstacle = obstacles[i];
+                if (ballX + 19 > obstacle.x && ballX - 19 < obstacle.x + 30 &&
+                    ballY + 19 > 375 && ballY - 19 < 400) {
+                    gameOver = true; // Game over if collision occurs
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Draw background
+        function drawBackground() {
+            ctx.fillStyle = "lightgreen";
+            ctx.fillRect(0, 400, canvas.width, 180); // Grass
+            ctx.fillStyle = "brown";
+            ctx.fillRect(0, 400, canvas.width, 10); // Road
+        }
+
+        // Draw ball
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 19, 0, Math.PI * 2);
+            ctx.fillStyle = "black";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Draw clouds
+        function drawCloud(x, y) {
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.arc(x + 20, y - 10, 25, 0, Math.PI * 2);
+            ctx.arc(x + 40, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw trees
+        function drawTrees() {
+            ctx.fillStyle = "brown";
+            ctx.fillRect(596, 300, 25, 100); // Tree trunk
+            ctx.fillStyle = "darkgreen";
+            ctx.beginPath();
+            ctx.arc(610, 280, 45, 0, Math.PI * 2); // Tree leaves
+            ctx.fill();
+            
+            // Additional tree 1
+            ctx.fillStyle = "brown";
+            ctx.fillRect(300, 310, 25, 100); // Tree trunk
+            ctx.fillStyle = "darkgreen";
+            ctx.beginPath();
+            ctx.arc(312, 290, 45, 0, Math.PI * 2); // Tree leaves
+            ctx.fill();
+
+            // Additional tree 2
+            ctx.fillStyle = "brown";
+            ctx.fillRect(860, 300, 25, 100); // Tree trunk
+            ctx.fillStyle = "darkgreen";
+            ctx.beginPath();
+            ctx.arc(875, 270, 45, 0, Math.PI * 2); // Tree leaves
+            ctx.fill();
+        }
+
+        // Draw obstacles
+        function drawObstacle(x) {
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.moveTo(x, 400); // Bottom left
+            ctx.lineTo(x + 15, 375); // Top
+            ctx.lineTo(x + 30, 400); // Bottom right
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Update obstacles
+        function updateObstacles() {
+            obstacles.forEach(obstacle => {
+                obstacle.x -= obstacle.speed; // Move obstacles left
+
+                // Reset obstacle position if it goes off screen
+                if (obstacle.x < 0) {
+                    obstacle.x = canvas.width;
+                }
+            });
+        }
+
+        // Draw the score on the canvas
+        function drawScore() {
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "black";
+            ctx.fillText("Score: " + score, 20, 40); // Display score at the top-left corner
+        }
+
+        // Draw game over message
+        function drawGameOver() {
+            ctx.font = "50px Arial";
+            ctx.fillStyle = "red";
+            ctx.fillText("Game Over", canvas.width / 2 - 150, canvas.height / 2); // Center the game over text
+        }
+
+        // Main game loop
+        function drawScene() {
+            if (gameOver) {
+                drawGameOver(); // Show game over message
+                return; // Stop the game loop
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawCloud(100, 100); // Existing cloud
+            drawCloud(700, 80); // Existing cloud
+            drawCloud(300, 150); // New cloud 1
+            drawCloud(500, 120); // New cloud 2
+            drawTrees(); // Trees with additional trees
+            drawBall();
+            obstacles.forEach(obstacle => drawObstacle(obstacle.x)); // Draw all obstacles
+            updateObstacles(); // Update obstacles positions
+            drawScore(); // Call drawScore to display the updated score
+
+            // Check for collisions
+            if (checkCollision()) {
+                return; // Stop the game loop if collision occurs
+            }
+
+            requestAnimationFrame(drawScene); // Repeatedly call drawScene
+        }
+
+        drawScene(); // Initial draw
+    </script>
+</body>
+</html>
