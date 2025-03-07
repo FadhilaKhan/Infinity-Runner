@@ -22,11 +22,10 @@
 
         let ballX = 100;
         let ballY = 380;
-        let velocityY = 0; // Vertical speed
-        let gravity = 0.5; // Gravity force
-        let isJumping = false; // Track jump status
+        let velocityY = 0;
+        let gravity = 0.5;
+        let isJumping = false;
 
-        // Obstacles array
         let obstacles = [
             { x: 500, speed: 3 },
             { x: 800, speed: 3 },
@@ -34,38 +33,38 @@
             { x: 2000, speed: 3 }
         ];
 
+        let backgroundOffset = 0; // Background movement
+        const backgroundSpeed = 3; // Same speed as obstacles
+
         let score = 0;
-        let highScore = localStorage.getItem("highScore") || 0; // Retrieve high score from local storage
+        let highScore = localStorage.getItem("highScore") || 0;
         let gameOver = false;
 
-        // Score increase interval
         setInterval(() => {
             if (!gameOver) {
                 score += 1;
                 if (score > highScore) {
                     highScore = score;
-                    localStorage.setItem("highScore", highScore); // Store high score
+                    localStorage.setItem("highScore", highScore);
                 }
             }
         }, 500);
 
         document.addEventListener("keydown", (event) => {
             if (event.code === "Space" && !isJumping && !gameOver) {
-                velocityY = -12; // Jump strength
-                isJumping = true; // Start jump
+                velocityY = -12;
+                isJumping = true;
             }
         });
 
-
         function applyPhysics() {
-            velocityY += gravity; // Apply gravity
-            ballY += velocityY; // Update position
+            velocityY += gravity;
+            ballY += velocityY;
 
-            // Stop falling if on the ground
             if (ballY >= 380) {
                 ballY = 380;
-                isJumping = false; // Reset jump flag
-                velocityY = 0; // Stop downward movement
+                isJumping = false;
+                velocityY = 0;
             }
         }
 
@@ -80,11 +79,21 @@
             return false;
         }
 
+        function updateBackground() {
+            backgroundOffset += backgroundSpeed; // Move background rightward
+            if (backgroundOffset >= canvas.width) {
+                backgroundOffset = 0; // Reset background for looping effect
+            }
+        }
+
         function drawBackground() {
             ctx.fillStyle = "lightgreen";
-            ctx.fillRect(0, 400, canvas.width, 180);
+            ctx.fillRect(-backgroundOffset, 400, canvas.width, 180);
+            ctx.fillRect(canvas.width - backgroundOffset, 400, canvas.width, 180);
+            
             ctx.fillStyle = "brown";
-            ctx.fillRect(0, 400, canvas.width, 10);
+            ctx.fillRect(-backgroundOffset, 400, canvas.width, 10);
+            ctx.fillRect(canvas.width - backgroundOffset, 400, canvas.width, 10);
         }
 
         function drawBall() {
@@ -108,7 +117,7 @@
         function updateObstacles() {
             obstacles.forEach(obstacle => {
                 obstacle.x -= obstacle.speed;
-                if (obstacle.x < -30) { // Reset obstacle if off screen
+                if (obstacle.x < -30) {
                     obstacle.x = canvas.width + Math.random() * 200;
                 }
             });
@@ -142,10 +151,10 @@
         function drawTrees() {
             function drawTree(x, trunkHeight, leavesRadius) {
                 ctx.fillStyle = "brown";
-                ctx.fillRect(x, 400 - trunkHeight, 25, trunkHeight); // Tree trunk
+                ctx.fillRect(x + backgroundOffset, 400 - trunkHeight, 25, trunkHeight);
                 ctx.fillStyle = "darkgreen";
                 ctx.beginPath();
-                ctx.arc(x + 12, 400 - trunkHeight - 20, leavesRadius, 0, Math.PI * 2); // Tree leaves
+                ctx.arc(x + backgroundOffset + 12, 400 - trunkHeight - 20, leavesRadius, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -161,15 +170,16 @@
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateBackground();
             drawBackground();
 
-            // Draw moving background elements
-            drawCloud(100, 100);
-            drawCloud(700, 80);
-            drawCloud(300, 150);
-            drawCloud(500, 120);
-            drawTrees();
+            // Move clouds at a slower rate for a parallax effect
+            drawCloud(100 + backgroundOffset * 0.5, 100);
+            drawCloud(700 + backgroundOffset * 0.5, 80);
+            drawCloud(300 + backgroundOffset * 0.5, 150);
+            drawCloud(500 + backgroundOffset * 0.5, 120);
 
+            drawTrees();
             drawBall();
             obstacles.forEach(obstacle => drawObstacle(obstacle.x));
             updateObstacles();
