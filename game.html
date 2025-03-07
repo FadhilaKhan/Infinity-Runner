@@ -22,73 +22,114 @@
 
         let ballX = 100;
         let ballY = 380;
-        let ballSpeed = 3; // Slower ball speed
-        let isJumping = false; // Track if the ball is in the air
-        let jumpHeight = 80; // Height of the jump
-        let jumpSpeed = 15; // Speed of the jump
+        let velocityY = 0; // Vertical speed
+        let gravity = 0.5; // Gravity force
+        let isJumping = false; // Track jump status
 
-        // Adding more obstacles with varying positions and speeds
+        // Obstacles array
         let obstacles = [
             { x: 500, speed: 3 },
             { x: 800, speed: 3 },
-            { x: 1200, speed: 3 },  // New obstacle 1
-            { x: 2000, speed: 3 }   // New obstacle 3
+            { x: 1200, speed: 3 },
+            { x: 2000, speed: 3 }
         ];
 
-        let score = 0; // Initialize score
-        let gameOver = false; // Flag to track if the game is over
+        let score = 0;
+        let highScore = localStorage.getItem("highScore") || 0; // Retrieve high score from local storage
+        let gameOver = false;
 
-        // Increment score every second (1000 milliseconds)
+        // Score increase interval
         setInterval(() => {
             if (!gameOver) {
-                score += 1; // Increase score by 1 every second
+                score += 1;
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem("highScore", highScore); // Store high score
+                }
             }
         }, 500);
 
-        // Handle keydown events for movement
+        // Handle jump with smooth physics
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp" && !isJumping && !gameOver) {
+                velocityY = -12; // Jump strength
                 isJumping = true; // Start jump
-                ballY -= jumpHeight; // Jump effect
-                setTimeout(() => {
-                    ballY += jumpHeight; // Simulate gravity
-                    isJumping = false; // End jump
-                }, 300); // Gravity effect after 300ms
             }
         });
 
-        // Collision detection function
+        function applyPhysics() {
+            velocityY += gravity; // Apply gravity
+            ballY += velocityY; // Update position
+
+            // Stop falling if on the ground
+            if (ballY >= 380) {
+                ballY = 380;
+                isJumping = false; // Reset jump flag
+                velocityY = 0; // Stop downward movement
+            }
+        }
+
         function checkCollision() {
-            // Check if the ball's position overlaps with any of the obstacles
-            for (let i = 0; i < obstacles.length; i++) {
-                let obstacle = obstacles[i];
+            for (let obstacle of obstacles) {
                 if (ballX + 19 > obstacle.x && ballX - 19 < obstacle.x + 30 &&
                     ballY + 19 > 375 && ballY - 19 < 400) {
-                    gameOver = true; // Game over if collision occurs
+                    gameOver = true;
                     return true;
                 }
             }
             return false;
         }
 
-        // Draw background
         function drawBackground() {
             ctx.fillStyle = "lightgreen";
-            ctx.fillRect(0, 400, canvas.width, 180); // Grass
+            ctx.fillRect(0, 400, canvas.width, 180);
             ctx.fillStyle = "brown";
-            ctx.fillRect(0, 400, canvas.width, 10); // Road
+            ctx.fillRect(0, 400, canvas.width, 10);
         }
 
-        // Draw ball
         function drawBall() {
             ctx.beginPath();
-            ctx.arc(ballX, ballY, 19, 0, Math.PI * 2);
+            ctx.arc(ballX, ballY, 20, 0, Math.PI * 2);
             ctx.fillStyle = "black";
             ctx.fill();
             ctx.closePath();
         }
 
-        // Draw clouds
+        function drawObstacle(x) {
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.moveTo(x, 400);
+            ctx.lineTo(x + 15, 375);
+            ctx.lineTo(x + 30, 400);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function updateObstacles() {
+            obstacles.forEach(obstacle => {
+                obstacle.x -= obstacle.speed;
+                if (obstacle.x < -30) { // Reset obstacle if off screen
+                    obstacle.x = canvas.width + Math.random() * 200;
+                }
+            });
+        }
+
+        function drawScore() {
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "black";
+            ctx.fillText("Score: " + score, 20, 40);
+            ctx.fillText("High Score: " + highScore, 20, 80);
+        }
+
+        function drawGameOver() {
+            ctx.font = "50px Arial";
+            ctx.fillStyle = "red";
+            ctx.fillText("Game Over", canvas.width / 2 - 150, canvas.height / 2);
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "black";
+            ctx.fillText("Press F5 to Restart", canvas.width / 2 - 130, canvas.height / 2 + 50);
+        }
+
         function drawCloud(x, y) {
             ctx.fillStyle = "white";
             ctx.beginPath();
@@ -98,97 +139,49 @@
             ctx.fill();
         }
 
-        // Draw trees
         function drawTrees() {
-            ctx.fillStyle = "brown";
-            ctx.fillRect(596, 300, 25, 100); // Tree trunk
-            ctx.fillStyle = "darkgreen";
-            ctx.beginPath();
-            ctx.arc(610, 280, 45, 0, Math.PI * 2); // Tree leaves
-            ctx.fill();
-            
-            // Additional tree 1
-            ctx.fillStyle = "brown";
-            ctx.fillRect(300, 310, 25, 100); // Tree trunk
-            ctx.fillStyle = "darkgreen";
-            ctx.beginPath();
-            ctx.arc(312, 290, 45, 0, Math.PI * 2); // Tree leaves
-            ctx.fill();
+            function drawTree(x, trunkHeight, leavesRadius) {
+                ctx.fillStyle = "brown";
+                ctx.fillRect(x, 400 - trunkHeight, 25, trunkHeight); // Tree trunk
+                ctx.fillStyle = "darkgreen";
+                ctx.beginPath();
+                ctx.arc(x + 12, 400 - trunkHeight - 20, leavesRadius, 0, Math.PI * 2); // Tree leaves
+                ctx.fill();
+            }
 
-            // Additional tree 2
-            ctx.fillStyle = "brown";
-            ctx.fillRect(860, 300, 25, 100); // Tree trunk
-            ctx.fillStyle = "darkgreen";
-            ctx.beginPath();
-            ctx.arc(875, 270, 45, 0, Math.PI * 2); // Tree leaves
-            ctx.fill();
+            drawTree(150, 80, 40);
+            drawTree(600, 90, 45);
+            drawTree(900, 70, 35);
         }
 
-        // Draw obstacles
-        function drawObstacle(x) {
-            ctx.fillStyle = "red";
-            ctx.beginPath();
-            ctx.moveTo(x, 400); // Bottom left
-            ctx.lineTo(x + 15, 375); // Top
-            ctx.lineTo(x + 30, 400); // Bottom right
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        // Update obstacles
-        function updateObstacles() {
-            obstacles.forEach(obstacle => {
-                obstacle.x -= obstacle.speed; // Move obstacles left
-
-                // Reset obstacle position if it goes off screen
-                if (obstacle.x < 0) {
-                    obstacle.x = canvas.width;
-                }
-            });
-        }
-
-        // Draw the score on the canvas
-        function drawScore() {
-            ctx.font = "30px Arial";
-            ctx.fillStyle = "black";
-            ctx.fillText("Score: " + score, 20, 40); // Display score at the top-left corner
-        }
-
-        // Draw game over message
-        function drawGameOver() {
-            ctx.font = "50px Arial";
-            ctx.fillStyle = "red";
-            ctx.fillText("Game Over", canvas.width / 2 - 150, canvas.height / 2); // Center the game over text
-        }
-
-        // Main game loop
         function drawScene() {
             if (gameOver) {
-                drawGameOver(); // Show game over message
-                return; // Stop the game loop
+                drawGameOver();
+                return;
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawBackground();
-            drawCloud(100, 100); // Existing cloud
-            drawCloud(700, 80); // Existing cloud
-            drawCloud(300, 150); // New cloud 1
-            drawCloud(500, 120); // New cloud 2
-            drawTrees(); // Trees with additional trees
+
+            // Draw moving background elements
+            drawCloud(100, 100);
+            drawCloud(700, 80);
+            drawCloud(300, 150);
+            drawCloud(500, 120);
+            drawTrees();
+
             drawBall();
-            obstacles.forEach(obstacle => drawObstacle(obstacle.x)); // Draw all obstacles
-            updateObstacles(); // Update obstacles positions
-            drawScore(); // Call drawScore to display the updated score
+            obstacles.forEach(obstacle => drawObstacle(obstacle.x));
+            updateObstacles();
+            applyPhysics();
+            drawScore();
 
-            // Check for collisions
-            if (checkCollision()) {
-                return; // Stop the game loop if collision occurs
-            }
+            if (checkCollision()) return;
 
-            requestAnimationFrame(drawScene); // Repeatedly call drawScene
+            requestAnimationFrame(drawScene);
         }
 
-        drawScene(); // Initial draw
+        drawScene();
     </script>
 </body>
 </html>
