@@ -49,13 +49,13 @@
             }
         }, 500);
 
-        // Handle jump with smooth physics
         document.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowUp" && !isJumping && !gameOver) {
+            if (event.code === "Space" && !isJumping && !gameOver) {
                 velocityY = -12; // Jump strength
                 isJumping = true; // Start jump
             }
         });
+
 
         function applyPhysics() {
             velocityY += gravity; // Apply gravity
