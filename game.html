@@ -50,7 +50,7 @@
      <div id="questionContainer">
         <img id="questionImg" src="" alt="Question">
         <br>
-        <input type="text" id="answerInput" placeholder="Enter Answer">
+        <input type="number" id="answerInput" min="0">
         <br>
         <button id="submitAnswer">Submit</button>
         <p id="feedback"></p>
@@ -61,7 +61,6 @@
         const ctx = canvas.getContext("2d");
         canvas.width = 1000;
         canvas.height = 580;
-
         let ballX = 100;
         let ballY = 380;
         let velocityY = 0;
@@ -70,15 +69,15 @@
         let paused = false;  
 
         let obstacles = [
-            { x: 500, speed: 1.5 },
-            { x: 800, speed: 1.5 },
-            { x: 1200, speed: 1.5 },
-            { x: 2000, speed: 1.5 }
+            { x: 500, speed: 1.4 },
+            { x: 800, speed: 1.4 },
+            { x: 1200, speed: 1.4 },
+            { x: 2000, speed: 1.4 }
         ];
 
         let questionData = null;  
         let backgroundOffset = 0; // Background movement
-        const backgroundSpeed = 3; // Same speed as obstacles
+        const backgroundSpeed = 0.5; // Same speed as obstacles
 
         let score = 0;
         let highScore = localStorage.getItem("highScore") || 0;
@@ -94,10 +93,12 @@
             try {
                 const response = await fetch("https://marcconrad.com/uob/banana/api.php?out=json");
                 questionData = await response.json();
+                console.log("Question Data:", questionData); // Debugging
             } catch (error) {
                 console.error("Error fetching question:", error);
             }
         }
+
         setInterval(() => {
             if (!gameOver) {
                 score += 1;
@@ -131,9 +132,8 @@
                 if (ballX + 19 > obstacle.x && ballX - 19 < obstacle.x + 30 &&
                     ballY + 19 > 375 && ballY - 19 < 400) {
                         paused = true;
-                        // Show question pop-up
                         showQuestion();
-                return true;
+                        return true;
                 }
             }
             return false;
@@ -149,16 +149,24 @@
         }
 
         submitAnswer.addEventListener("click", () => {
+            if (!questionData) {
+                feedback.textContent = "Question not loaded yet. Please wait.";
+                return;
+            }
+
             const userAnswer = answerInput.value.trim();
-            if (userAnswer.toLowerCase() === questionData.solution.toLowerCase()) {
-                // Correct answer, resume game
-                questionContainer.style.display = "none";
-                paused = false;
-                answerInput.value = "";
-                feedback.textContent = "";
-                requestAnimationFrame(drawScene);
+            const correctAnswer = String(questionData.solution).toLowerCase();
+
+            if (userAnswer.toLowerCase() === correctAnswer) {
+                feedback.textContent = `Correct! The answer is ${questionData.solution}. Resuming game...`;
+                setTimeout(() => {
+                    questionContainer.style.display = "none";
+                    paused = false;
+                    answerInput.value = "";
+                    feedback.textContent = "";
+                    requestAnimationFrame(drawScene);
+                }, 1000); // 1-second delay before resuming
             } else {
-                // Wrong answer
                 feedback.textContent = "Answer is Wrong! Try Again.";
             }
         });
@@ -250,7 +258,7 @@
         }
 
         function drawScene() {
-            if (gameOver|| paused) return; 
+            if (gameOver || paused) return; 
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             updateBackground();
@@ -276,8 +284,8 @@
 
         drawScene();
 
-         // Fetch a question at game start
-         fetchQuestion().then(() => drawScene());
+        // Fetch a question at game start
+        fetchQuestion().then(() => drawScene());
     </script>
 </body>
 </html>
