@@ -1,0 +1,36 @@
+canvas {
+    background: skyblue;
+    display: block;
+    margin: auto;
+}
+
+#questionContainer {
+    display: none;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+#questionImg {
+    max-width: 100%;
+    height: auto;
+}
+#answerInput {
+    margin-top: 10px;
+    padding: 5px;
+}
+#submitAnswer {
+    margin-top: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+#feedback {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
