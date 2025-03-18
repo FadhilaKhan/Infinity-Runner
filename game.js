@@ -30,6 +30,7 @@ const answerInput = document.getElementById("answerInput");
 const submitAnswer = document.getElementById("submitAnswer");
 const feedback = document.getElementById("feedback");
 
+submitAnswer.disabled = true; // Disable the submit button initially
 
 //API Integration for fetching questions
 async function fetchQuestion() {
@@ -37,6 +38,7 @@ async function fetchQuestion() {
         const response = await fetch("https://marcconrad.com/uob/banana/api.php?out=json");
         questionData = await response.json();
         console.log("Question Data:", questionData); // Debugging
+        submitAnswer.disabled = false; // Enable the submit button for the new question
     } catch (error) {
         console.error("Error fetching question:", error);
     }
@@ -82,7 +84,6 @@ function applyPhysics() {
     }
 }
 
-
 function checkCollision() {
     for (let obstacle of obstacles) {
         if (ballX + 19 > obstacle.x && ballX - 19 < obstacle.x + 30 &&
@@ -99,6 +100,7 @@ function showQuestion() {
     if (questionData) {
         questionImg.src = questionData.question;
         questionContainer.style.display = "block";
+        submitAnswer.disabled = false; // Enable the submit button
     } else {
         console.error("No question data available.");
     }
@@ -115,6 +117,7 @@ submitAnswer.addEventListener("click", () => {
 
     if (userAnswer.toLowerCase() === correctAnswer) {
         feedback.textContent = `Correct! The answer is ${questionData.solution}. Resuming game...`;
+        submitAnswer.disabled = true; // Disable the submit button after submission
         setTimeout(() => {
             questionContainer.style.display = "none";
             paused = false;
@@ -124,6 +127,7 @@ submitAnswer.addEventListener("click", () => {
         }, 1000); // 1-second delay before resuming
     } else {
         feedback.textContent = "Answer is Wrong! Try Again.";
+        submitAnswer.disabled = true; // Disable the submit button after submission
     }
 });
 
