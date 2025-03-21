@@ -1,5 +1,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
 canvas.width = 1000;
 canvas.height = 580;
 let ballX = 100;
@@ -246,3 +247,4 @@ drawScene();
 
 // Fetch a question at game start
 fetchQuestion().then(() => drawScene());
+
