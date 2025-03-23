@@ -1,29 +1,121 @@
-body {
-    font-family: Arial, sans-serif;
+/* Import a jungle-themed font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Jungle+Adventurer&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.background {
+    background-image: url('images/jungle.jpg');
+    background-size: contain;
+    background-position: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8; 
+    position: relative; /* Ensure the background is a positioning context */
+}
+
+/* Add monkey image to the bottom-left corner */
+.background::before {
+    content: "";
+    position: absolute; /* Position the monkey relative to the background */
+    bottom: 80px; /* Adjust the distance from the bottom */
+    left: 100px; /* Adjust the distance from the left */
+    width: 200px; /* Adjust the width of the monkey image */
+    height: 200px; /* Adjust the height of the monkey image */
+    background-image: url('images/monkey.png'); /* Path to your monkey image */
+    background-size: contain; /* Ensure the image fits within the dimensions */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    z-index: 1; /* Ensure the monkey stays above the background */
+}
+
+.start-container {
     text-align: center;
+    width: 100%;
+    position: relative; /* Ensure the container stays above the monkey */
+    z-index: 2; /* Ensure the container stays above the monkey */
 }
 
-#authContainer {
-    display: none;
-    margin-top: 20px;
+h1 {
+    font-family: 'Jungle Adventurer', cursive; /* Jungle-themed font */
+    font-size: 4rem; /* Large font size */
+    color: white; /* White text color */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Black text shadow for depth */
+    margin-bottom: 95px; /* Space between title and button */
+    letter-spacing: 4px; /* Spacing between letters for a wild look */
+    position: fixed;
+    bottom: 50%; /* Adjust this value to position the h1 at the top */
+    left: 50%;
+    transform: translateX(-50%); /* Center the text */
+    animation: popInOut 2s infinite; /* Apply the animation */
 }
 
-input {
-    padding: 10px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* Define the pop-in-and-out animation */
+@keyframes popInOut {
+    0% {
+        transform: translateX(-50%) scale(1); /* Normal size */
+    }
+    50% {
+        transform: translateX(-50%) scale(1.1); /* Scale up */
+    }
+    100% {
+        transform: translateX(-50%) scale(1); /* Return to normal size */
+    }
 }
 
-button {
-    padding: 10px 20px;
+#startButton {
     cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
+    width: 120px; /* Adjust button size as needed */
+    transition: transform 0.2s ease; /* Add hover effect */
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the button */
 }
 
-button:hover {
-    background-color: #45a049;
+#startButton:hover {
+    transform: translate(-50%, -50%) scale(1.1); /* Slightly enlarge button on hover */
+}
+
+.account-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 50px;
+}
+
+/* Style for New User and Registered User buttons */
+button {
+    padding: 15px 30px; /* Increase padding for a larger button */
+    font-size: 18px; /* Larger font size */
+    font-family: 'Jungle Adventurer', cursive; /* Jungle-themed font */
+    color: white; /* White text color */
+    background-color: #4a752c; /* Jungle green background */
+    border: 2px solid #6b8e23; /* Darker green border */
+    border-radius: 10px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Text shadow for depth */
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3); /* Button shadow for depth */
+}
+
+#newUser:hover, #registeredUser:hover {
+    background-color: #6b8e23; /* Darker green on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5); /* Enhanced shadow on hover */
+}
+
+#newUser:active, #registeredUser:active {
+    transform: scale(0.95); /* Slightly shrink on click */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Reduce shadow on click */
+}
+
+.hidden {
+    display: none;
 }

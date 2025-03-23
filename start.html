@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Runner - Start</title>
+    <title>Game Start Page</title>
     <link rel="stylesheet" href="start.css">
 </head>
 <body>
-    <div id="startPage">
-        <h1>Welcome to Infinity Runner!</h1>
-        <button id="startButton">Start Game</button>
-
-        <div id="authContainer">
-            <h2>Create Account</h2>
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <button id="signUpButton">Sign Up</button>
+    <div class="background">
+        <div class="start-container">
+            <h1 id="heading">INFINITY RUNNER</h1> 
+            <img id="startButton" src="images/Start_1.png" alt="Start Button">
+        </div>
+        <div id="accountOptions" class="account-options hidden">
+            <button id="newUser">New User</button>
+            <button id="registeredUser">Registered User</button>
         </div>
     </div>
-
     <script src="start.js"></script>
 </body>
 </html>

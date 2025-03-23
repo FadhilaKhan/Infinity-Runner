@@ -1,0 +1,103 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #b6dfb6; /* Light green background */
+    position: relative;
+    min-height: 100vh; /* Ensure the body takes at least the full viewport height */
+    overflow: hidden; /* Prevent scrolling */
+}
+
+/* Add grass image at the bottom */
+body::after {
+    content: "";
+    position: fixed; /* Fix the grass to the bottom of the screen */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px; /* Height of the grass image */
+    background-image: url('images/grass.png'); /* Path to your grass image */
+    background-repeat: repeat-x; /* Repeat the grass image horizontally */
+    background-size: auto 100%; /* Scale the grass image to fit the height */
+    z-index: 1; /* Ensure the grass stays above the background but below the content */
+}
+
+body::before {
+    content: "";
+    position: fixed; /* Fix the monkey to the bottom-left of the screen */
+    bottom: 40px; /* Position above the grass */
+    left: 40px; /* Adjust the left position as needed */
+    width: 150px; /* Adjust the width of the monkey image */
+    height: 150px; /* Adjust the height of the monkey image */
+    background-image: url('images/monkey.png'); /* Path to your monkey image */
+    background-size: contain; /* Ensure the image fits within the dimensions */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    z-index: 2; /* Ensure the monkey stays above the grass */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.start-container, .form-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #93c793;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure the container stays above the grass */
+    z-index: 2; /* Ensure the container stays above the grass */
+}
+
+.start-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+
+
+.form-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin: 10px 0 5px;
+}
+
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button[type="submit"] {
+    padding: 10px;
+    background-color: #5e4606;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #756025;
+}
+
+p {
+    text-align: center;
+    margin-top: 15px;
+}
+
+a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
