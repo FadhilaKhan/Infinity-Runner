@@ -30,10 +30,13 @@ const questionImg = document.getElementById("questionImg");
 const answerInput = document.getElementById("answerInput");
 const submitAnswer = document.getElementById("submitAnswer");
 const feedback = document.getElementById("feedback");
+
 // Load the jump sound
 const jumpSound = new Audio("music/jump.wav");
 const gameOverSound = new Audio("music/gameover.wav");
-
+const pauseButtonImage = new Image();
+pauseButtonImage.src = "images/pause.png"; // Path to the pause button image
+let isPauseButtonHovered = false; // Track if the pause button is hovered
 
 gameOverSound.play();
 
@@ -43,6 +46,21 @@ document.addEventListener("keydown", (event) => {
         velocityY = -14; // Increased for a better jump height
         isJumping = true;
         jumpSound.play(); // Play the jump sound
+    }
+});
+
+// Pause or resume the game when the pause button is clicked
+canvas.addEventListener("click", (event) => {
+    if (isMouseOverPauseButton(event.offsetX, event.offsetY)) {
+        paused = !paused; // Toggle pause state
+        if (paused) {
+            // Optionally, you could change the button image to show a "play" icon when paused
+            pauseButtonImage.src = "images/play.png"; // Play button when game is paused
+        } else {
+            // Reset the image back to the pause button
+            pauseButtonImage.src = "images/pause.png"; // Pause button when game is resumed
+            requestAnimationFrame(drawScene); // Resume the game
+        }
     }
 });
 
@@ -371,6 +389,59 @@ function drawScene() {
     applyPhysics();
 
     if (checkCollision()) return;
+
+    requestAnimationFrame(drawScene);
+}
+
+// Draw the pause button on the canvas
+function drawPauseButton() {
+    ctx.drawImage(pauseButtonImage, canvas.width - 70, 20, 50, 50); // Position the button at the top-right corner
+}
+
+// Check if the mouse is over the pause button
+function isMouseOverPauseButton(mouseX, mouseY) {
+    return mouseX >= canvas.width - 50 && mouseX <= canvas.width - 10 && mouseY >= 10 && mouseY <= 50;
+}
+
+// Check if the mouse is over the pause button
+function isMouseOverPauseButton(mouseX, mouseY) {
+    return mouseX >= canvas.width - 50 && mouseX <= canvas.width - 10 && mouseY >= 10 && mouseY <= 50;
+}
+
+// Draw the pause button with a pop-in and out effect
+function drawPauseButton() {
+    const buttonSize = 50;
+    const scaleFactor = isPauseButtonHovered ? 1.1 : 1; // Scale up when hovered
+
+    ctx.save(); // Save the current state of the context
+    ctx.translate(canvas.width - 70 + buttonSize / 2, 20 + buttonSize / 2); // Translate to the center of the button
+    ctx.scale(scaleFactor, scaleFactor); // Scale the button
+    ctx.drawImage(pauseButtonImage, -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize); // Draw the button centered at the translated position
+    ctx.restore(); // Restore the context to its original state
+}
+
+// Track mouse movement to detect hover over the pause button
+canvas.addEventListener("mousemove", (event) => {
+    isPauseButtonHovered = isMouseOverPauseButton(event.offsetX, event.offsetY);
+});
+
+function drawScene() {
+    if (gameOver || paused) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updateBackground();
+    drawBackground();
+    drawClouds();
+    drawTrees();
+    drawMonkey();  // Draw the animated monkey
+    obstacles.forEach(obstacle => drawObstacle(obstacle.x));
+    updateObstacles();
+    drawScore();
+    applyPhysics();
+
+    if (checkCollision()) return;
+
+    drawPauseButton(); // Draw the pause button on top of the game
 
     requestAnimationFrame(drawScene);
 }
