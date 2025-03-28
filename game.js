@@ -30,6 +30,22 @@ const questionImg = document.getElementById("questionImg");
 const answerInput = document.getElementById("answerInput");
 const submitAnswer = document.getElementById("submitAnswer");
 const feedback = document.getElementById("feedback");
+// Load the jump sound
+const jumpSound = new Audio("music/jump.wav");
+const gameOverSound = new Audio("music/gameover.wav");
+
+
+gameOverSound.play();
+
+
+document.addEventListener("keydown", (event) => {
+    if (event.code === "Space" && !isJumping && !gameOver) {
+        velocityY = -14; // Increased for a better jump height
+        isJumping = true;
+        jumpSound.play(); // Play the jump sound
+    }
+});
+
 
 submitAnswer.disabled = true; // Disable the submit button initially
 
@@ -90,12 +106,15 @@ function checkCollision() {
         if (ballX + 15 > obstacle.x && ballX - 19 < obstacle.x + 30 &&
             ballY + 15 > 420 - 30 && ballY - 19 < 400) { // Adjusted collision detection for new Y position
             paused = true;
+            gameOverSound.currentTime = 0; // Reset sound to allow replay
+            gameOverSound.play(); // Play the game over sound
             showQuestion();
             return true;
         }
     }
     return false;
 }
+
 
 function showQuestion() {
     if (questionData) {
