@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = 1300;
 canvas.height = 626.5;
 let ballX = 100;
-let ballY = 380; // Adjusted initial Y position to move the monkey up
+let ballY = 380;
 let velocityY = 0;
 let gravity = 0.5;
 let isJumping = false;
@@ -18,8 +18,8 @@ let obstacles = [
 ];
 
 let questionData = null;
-let backgroundOffset = 0; // Background movement
-const backgroundSpeed = 0.5; // Same speed as obstacles
+let backgroundOffset = 0;
+const backgroundSpeed = 0.5;
 
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
@@ -30,32 +30,47 @@ const questionImg = document.getElementById("questionImg");
 const answerInput = document.getElementById("answerInput");
 const submitAnswer = document.getElementById("submitAnswer");
 const feedback = document.getElementById("feedback");
-// Load the jump sound
+
 const jumpSound = new Audio("music/jump.wav");
 const gameOverSound = new Audio("music/gameover.wav");
+const pauseButtonImage = new Image();
+pauseButtonImage.src = "images/pause.png";
+let isPauseButtonHovered = false;
 
-
+// Play the game over sound on load (for testing)
 gameOverSound.play();
 
-
+// Listen for jump action
 document.addEventListener("keydown", (event) => {
     if (event.code === "Space" && !isJumping && !gameOver) {
-        velocityY = -14; // Increased for a better jump height
+        velocityY = -14;
         isJumping = true;
-        jumpSound.play(); // Play the jump sound
+        jumpSound.play();
     }
 });
 
+// Toggle pause state when the pause button is clicked
+canvas.addEventListener("click", (event) => {
+    if (isMouseOverPauseButton(event.offsetX, event.offsetY)) {
+        paused = !paused;
+        if (paused) {
+            pauseButtonImage.src = "images/play.png"; // Change icon to play when paused
+        } else {
+            pauseButtonImage.src = "images/pause.png";
+            requestAnimationFrame(drawScene);
+        }
+    }
+});
 
-submitAnswer.disabled = true; // Disable the submit button initially
+submitAnswer.disabled = true;
 
-// API Integration for fetching questions
+// Fetch a question from the Banana API
 async function fetchQuestion() {
     try {
         const response = await fetch("https://marcconrad.com/uob/banana/api.php?out=json");
         questionData = await response.json();
-        console.log("Question Data:", questionData); // Debugging
-        submitAnswer.disabled = false; // Enable the submit button for the new question
+        console.log("Question Data:", questionData);
+        submitAnswer.disabled = false;
     } catch (error) {
         console.error("Error fetching question:", error);
     }
@@ -73,54 +88,88 @@ setInterval(() => {
 
 document.addEventListener("keydown", (event) => {
     if (event.code === "Space" && !isJumping && !gameOver) {
-        velocityY = -14; // Increased for a better jump height
+        velocityY = -14;
         isJumping = true;
     }
 });
 
+// Apply physics to the monkey
 function applyPhysics() {
     if (isJumping) {
-        velocityY += gravity * 0.8; // Reduce gravity's effect while going up
+        velocityY += gravity * 0.8;
     } else {
-        velocityY += gravity; // Normal gravity effect on descent
+        velocityY += gravity;
     }
 
     ballY += velocityY;
 
-    // Limit jump height
-    if (ballY < 100) { // Adjusted to account for the higher starting position
+    if (ballY < 100) {
         ballY = 100;
-        velocityY = 0; // Stop excessive upward movement
+        velocityY = 0;
     }
 
-    // Stop the jump when reaching the ground
-    if (ballY >= 380) { // Adjusted ground level to match the new starting position
+    if (ballY >= 380) {
         ballY = 380;
         isJumping = false;
         velocityY = 0;
     }
 }
 
+// Save the score via an AJAX call to save_score.php
+function saveScore() {
+    const cookies = document.cookie.split(';');
+    let userId = null;
+    cookies.forEach(cookie => {
+        let [name, value] = cookie.trim().split('=');
+        if (name === 'user_id') {
+            userId = value;
+        }
+    });
+
+    if (!userId) {
+        console.error("User not logged in. Score not saved.");
+        return;
+    }
+
+    fetch("save_score.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "user_id=" + encodeURIComponent(userId) + "&score=" + encodeURIComponent(score)
+    })
+    .then(response => response.text())
+    .then(result => {
+        console.log("Server response:", result);
+    })
+    .catch(error => {
+        console.error("Error saving score:", error);
+    });
+}
+
+// Check for collision with obstacles
 function checkCollision() {
     for (let obstacle of obstacles) {
         if (ballX + 15 > obstacle.x && ballX - 19 < obstacle.x + 30 &&
-            ballY + 15 > 420 - 30 && ballY - 19 < 400) { // Adjusted collision detection for new Y position
+            ballY + 15 > 420 - 30 && ballY - 19 < 400) {
             paused = true;
-            gameOverSound.currentTime = 0; // Reset sound to allow replay
-            gameOverSound.play(); // Play the game over sound
+            gameOver = true;
+            gameOverSound.currentTime = 0;
+            gameOverSound.play();
             showQuestion();
+            saveScore();  // Save the score when collision occurs
             return true;
         }
     }
     return false;
 }
 
-
+// Display the question popup when game over occurs
 function showQuestion() {
     if (questionData) {
         questionImg.src = questionData.question;
         questionContainer.style.display = "block";
-        submitAnswer.disabled = false; // Enable the submit button
+        submitAnswer.disabled = false;
     } else {
         console.error("No question data available.");
     }
@@ -137,24 +186,25 @@ submitAnswer.addEventListener("click", () => {
 
     if (userAnswer.toLowerCase() === correctAnswer) {
         feedback.textContent = `Correct! The answer is ${questionData.solution}. Resuming game...`;
-        submitAnswer.disabled = true; // Disable the submit button after submission
+        submitAnswer.disabled = true;
         setTimeout(() => {
             questionContainer.style.display = "none";
             paused = false;
             answerInput.value = "";
             feedback.textContent = "";
             requestAnimationFrame(drawScene);
-        }, 1000); // 1-second delay before resuming
+        }, 1000);
     } else {
         feedback.textContent = "Answer is Wrong! Try Again.";
-        submitAnswer.disabled = true; // Disable the submit button after submission
+        submitAnswer.disabled = true;
     }
 });
 
+// Update and draw the background
 function updateBackground() {
-    backgroundOffset += backgroundSpeed; // Move background rightward
+    backgroundOffset += backgroundSpeed;
     if (backgroundOffset >= canvas.width) {
-        backgroundOffset = 0; // Reset background for looping effect
+        backgroundOffset = 0;
     }
 }
 
@@ -168,21 +218,20 @@ function drawBackground() {
     ctx.fillRect(canvas.width - backgroundOffset, 450, canvas.width, 20);
 }
 
-let frame = 0; // Animation frame counter
-const animationSpeed = 5; // Speed of animation (lower is faster)
+let frame = 0;
+const animationSpeed = 5;
 
+// Draw the animated monkey
 function drawMonkey() {
-    // Draw the head with a gradient for fur texture
     const headGradient = ctx.createRadialGradient(ballX, ballY, 0, ballX, ballY, 15);
-    headGradient.addColorStop(0, "#8B4513"); // Dark brown for shading
-    headGradient.addColorStop(1, "#A0522D"); // Light brown for highlights
+    headGradient.addColorStop(0, "#8B4513");
+    headGradient.addColorStop(1, "#A0522D");
     ctx.beginPath();
     ctx.arc(ballX, ballY, 15, 0, Math.PI * 2);
     ctx.fillStyle = headGradient;
     ctx.fill();
     ctx.closePath();
 
-    // Draw the ears with fur texture
     ctx.beginPath();
     ctx.arc(ballX - 20, ballY - 10, 8, 0, Math.PI * 2);
     ctx.arc(ballX + 20, ballY - 10, 8, 0, Math.PI * 2);
@@ -190,7 +239,6 @@ function drawMonkey() {
     ctx.fill();
     ctx.closePath();
 
-    // Draw the eyes with more detail
     ctx.beginPath();
     ctx.arc(ballX - 8, ballY - 5, 4, 0, Math.PI * 2);
     ctx.arc(ballX + 8, ballY - 5, 4, 0, Math.PI * 2);
@@ -198,7 +246,6 @@ function drawMonkey() {
     ctx.fill();
     ctx.closePath();
 
-    // Draw the pupils with a highlight
     ctx.beginPath();
     ctx.arc(ballX - 8, ballY - 5, 2, 0, Math.PI * 2);
     ctx.arc(ballX + 8, ballY - 5, 2, 0, Math.PI * 2);
@@ -206,20 +253,18 @@ function drawMonkey() {
     ctx.fill();
     ctx.closePath();
     ctx.beginPath();
-    ctx.arc(ballX - 6, ballY - 6, 1, 0, Math.PI * 2); // Highlight
+    ctx.arc(ballX - 6, ballY - 6, 1, 0, Math.PI * 2);
     ctx.arc(ballX + 10, ballY - 6, 1, 0, Math.PI * 2);
     ctx.fillStyle = "white";
     ctx.fill();
     ctx.closePath();
 
-    // Draw the nose
     ctx.beginPath();
     ctx.arc(ballX, ballY + 5, 4, 0, Math.PI * 2);
     ctx.fillStyle = "black";
     ctx.fill();
     ctx.closePath();
 
-    // Draw the mouth
     ctx.beginPath();
     ctx.arc(ballX, ballY + 10, 6, 0, Math.PI, false);
     ctx.strokeStyle = "black";
@@ -227,65 +272,61 @@ function drawMonkey() {
     ctx.stroke();
     ctx.closePath();
 
-    // Draw the body with a gradient for fur texture
     const bodyGradient = ctx.createLinearGradient(ballX, ballY + 20, ballX, ballY + 80);
-    bodyGradient.addColorStop(0, "#8B4513"); // Dark brown
-    bodyGradient.addColorStop(1, "#A0522D"); // Light brown
+    bodyGradient.addColorStop(0, "#8B4513");
+    bodyGradient.addColorStop(1, "#A0522D");
     ctx.beginPath();
-    ctx.ellipse(ballX, ballY + 36, 15, 25, 0, 0, Math.PI * 2); // More proportional body
+    ctx.ellipse(ballX, ballY + 36, 15, 25, 0, 0, Math.PI * 2);
     ctx.fillStyle = bodyGradient;
     ctx.fill();
     ctx.closePath();
 
-    // Animate the arms and legs
-    const armSwing = Math.sin(frame / animationSpeed) * 10; // Swing arms back and forth
-    const legSwing = Math.cos(frame / animationSpeed) * 10; // Swing legs back and forth
+    const armSwing = Math.sin(frame / animationSpeed) * 10;
+    const legSwing = Math.cos(frame / animationSpeed) * 10;
 
-    // Draw the arms with animation
     ctx.beginPath();
     ctx.moveTo(ballX - 15, ballY + 20);
-    ctx.quadraticCurveTo(ballX - 30 - armSwing, ballY + 30, ballX - 30 - armSwing, ballY + 10); // Left arm
+    ctx.quadraticCurveTo(ballX - 30 - armSwing, ballY + 30, ballX - 30 - armSwing, ballY + 10);
     ctx.moveTo(ballX + 15, ballY + 20);
-    ctx.quadraticCurveTo(ballX + 30 + armSwing, ballY + 30, ballX + 30 + armSwing, ballY + 10); // Right arm
+    ctx.quadraticCurveTo(ballX + 30 + armSwing, ballY + 30, ballX + 30 + armSwing, ballY + 10);
     ctx.strokeStyle = "brown";
     ctx.lineWidth = 6;
     ctx.stroke();
     ctx.closePath();
 
-    // Draw the legs with animation
     ctx.beginPath();
     ctx.moveTo(ballX - 8, ballY + 50);
-    ctx.quadraticCurveTo(ballX - 15 - legSwing, ballY + 70, ballX - 15 - legSwing, ballY + 80); // Left leg
+    ctx.quadraticCurveTo(ballX - 15 - legSwing, ballY + 70, ballX - 15 - legSwing, ballY + 80);
     ctx.moveTo(ballX + 8, ballY + 50);
-    ctx.quadraticCurveTo(ballX + 15 + legSwing, ballY + 70, ballX + 15 + legSwing, ballY + 80); // Right leg
+    ctx.quadraticCurveTo(ballX + 15 + legSwing, ballY + 70, ballX + 15 + legSwing, ballY + 80);
     ctx.strokeStyle = "brown";
     ctx.lineWidth = 6;
     ctx.stroke();
     ctx.closePath();
 
-    // Draw the tail with a dynamic curve
     ctx.beginPath();
     ctx.moveTo(ballX + 15, ballY + 30);
-    ctx.quadraticCurveTo(ballX + 40, ballY + 50, ballX + 30, ballY + 90); // More dynamic tail
+    ctx.quadraticCurveTo(ballX + 40, ballY + 50, ballX + 30, ballY + 90);
     ctx.strokeStyle = "brown";
     ctx.lineWidth = 5;
     ctx.stroke();
     ctx.closePath();
 
-    // Increment the animation frame
     frame++;
 }
 
+// Draw obstacles
 function drawObstacle(x) {
     ctx.fillStyle = "red";
     ctx.beginPath();
-    ctx.moveTo(x, 450);  // Move obstacle to ground level
+    ctx.moveTo(x, 450);
     ctx.lineTo(x + 15, 427);
     ctx.lineTo(x + 30, 450);
     ctx.closePath();
     ctx.fill();
 }
 
+// Update obstacle positions
 function updateObstacles() {
     if (!paused) {
         obstacles.forEach(obstacle => {
@@ -297,6 +338,7 @@ function updateObstacles() {
     }
 }
 
+// Draw score on canvas
 function drawScore() {
     ctx.font = "30px Arial";
     ctx.fillStyle = "black";
@@ -331,8 +373,6 @@ function drawTrees() {
         ctx.arc(x + backgroundOffset + 12, 450 - trunkHeight - 30, leavesRadius, 0, Math.PI * 2);
         ctx.fill();
     }
-
-    // Add more trees at various locations
     drawTree(100, 80, 40);
     drawTree(300, 100, 45);
     drawTree(500, 90, 50);
@@ -356,26 +396,41 @@ function drawClouds() {
     drawCloud(1700 + backgroundOffset * 0.6, 100);
 }
 
+function isMouseOverPauseButton(mouseX, mouseY) {
+    return mouseX >= canvas.width - 50 && mouseX <= canvas.width - 10 && mouseY >= 10 && mouseY <= 50;
+}
+
+function drawPauseButton() {
+    const buttonSize = 50;
+    const scaleFactor = isPauseButtonHovered ? 1.1 : 1;
+    ctx.save();
+    ctx.translate(canvas.width - 70 + buttonSize / 2, 20 + buttonSize / 2);
+    ctx.scale(scaleFactor, scaleFactor);
+    ctx.drawImage(pauseButtonImage, -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize);
+    ctx.restore();
+}
+
+canvas.addEventListener("mousemove", (event) => {
+    isPauseButtonHovered = isMouseOverPauseButton(event.offsetX, event.offsetY);
+});
+
+// Main game loop: update, draw, and check collisions
 function drawScene() {
     if (gameOver || paused) return;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBackground();
     drawBackground();
     drawClouds();
     drawTrees();
-    drawMonkey();  // Draw the animated monkey
+    drawMonkey();
     obstacles.forEach(obstacle => drawObstacle(obstacle.x));
     updateObstacles();
     drawScore();
     applyPhysics();
-
     if (checkCollision()) return;
-
+    drawPauseButton();
     requestAnimationFrame(drawScene);
 }
 
 drawScene();
-
-// Fetch a question at game start
 fetchQuestion().then(() => drawScene());

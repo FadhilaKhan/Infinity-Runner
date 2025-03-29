@@ -37,25 +37,28 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup - Infinity Runner</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="form-container">
         <h1>Create an Account</h1>
         <form action="signup.php" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
-            
+
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
-            
+
             <button type="submit">Sign Up</button>
         </form>
         <p>Already have an account? <a href="login.php">Login here</a></p>
     </div>
 </body>
+
 </html>
