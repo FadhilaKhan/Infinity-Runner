@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost"; // Change if you're using a different server
 $username = "root"; // Change to your MySQL username
-$password = "4989"; // Change to your MySQL password
+$password = ""; // Change to your MySQL password
 $dbname = "infinity_runner"; // Database name
 
 // Create connection
