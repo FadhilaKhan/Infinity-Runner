@@ -30,6 +30,16 @@ const questionImg = document.getElementById("questionImg");
 const answerInput = document.getElementById("answerInput");
 const submitAnswer = document.getElementById("submitAnswer");
 const feedback = document.getElementById("feedback");
+const pauseContainer = document.getElementById("pauseContainer");
+const resumeButton = document.getElementById("resumeButton");
+const restartButton = document.getElementById("restartButton");
+const exitButton = document.getElementById("exitButton");
+const settingsContainer = document.getElementById("settingsContainer");
+const settingsButton = document.getElementById("settingsButton");
+const saveSettings = document.getElementById("saveSettings");
+const cancelSettings = document.getElementById("cancelSettings");
+const backgroundVolumeControl = document.getElementById("backgroundVolume");
+const jumpVolumeControl = document.getElementById("jumpVolume");
 
 const jumpSound = new Audio("music/jump.wav");
 const gameOverSound = new Audio("music/gameover.wav");
@@ -54,14 +64,74 @@ canvas.addEventListener("click", (event) => {
     if (isMouseOverPauseButton(event.offsetX, event.offsetY)) {
         paused = !paused;
         if (paused) {
-            pauseButtonImage.src = "images/play.png"; // Change icon to play when paused
+            window.backgroundMusic.pause();
+            showPauseMenu();
+            pauseButtonImage.src = "images/play.png";
         } else {
+            window.backgroundMusic.play();
+            hidePauseMenu();
             pauseButtonImage.src = "images/pause.png";
             requestAnimationFrame(drawScene);
         }
     }
 });
 
+// Add these new functions:
+function showPauseMenu() {
+    pauseContainer.style.display = "block";
+}
+
+function hidePauseMenu() {
+    pauseContainer.style.display = "none";
+}
+
+// Add event listeners for the pause menu buttons
+resumeButton.addEventListener("click", () => {
+    paused = false;
+    hidePauseMenu();
+    pauseButtonImage.src = "images/pause.png";
+    requestAnimationFrame(drawScene);
+});
+
+restartButton.addEventListener("click", () => {
+    location.reload(); // Simple reload for now
+});
+
+exitButton.addEventListener("click", () => {
+    // You might want to redirect to a menu page instead
+    window.location.href = "login.php"; // Change to your exit page
+});
+
+// Settings button click handler
+settingsButton.addEventListener("click", () => {
+    paused = true;
+    settingsContainer.style.display = "block";
+    
+    // Set current volumes in controls
+    backgroundVolumeControl.value = window.backgroundMusic.volume;
+    jumpVolumeControl.value = jumpSound.volume;
+});
+
+// Save settings handler
+saveSettings.addEventListener("click", () => {
+    window.backgroundMusic.volume = parseFloat(backgroundVolumeControl.value);
+    jumpSound.volume = parseFloat(jumpVolumeControl.value);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem("backgroundVolume", backgroundVolumeControl.value);
+    localStorage.setItem("jumpVolume", jumpVolumeControl.value);
+    
+    settingsContainer.style.display = "none";
+    paused = false;
+    requestAnimationFrame(drawScene);
+});
+
+// Cancel settings handler
+cancelSettings.addEventListener("click", () => {
+    settingsContainer.style.display = "none";
+    paused = false;
+    requestAnimationFrame(drawScene);
+});
 submitAnswer.disabled = true;
 
 // Fetch a question from the Banana API
@@ -414,9 +484,23 @@ canvas.addEventListener("mousemove", (event) => {
     isPauseButtonHovered = isMouseOverPauseButton(event.offsetX, event.offsetY);
 });
 
-// Main game loop: update, draw, and check collisions
+
 function drawScene() {
-    if (gameOver || paused) return;
+    if (gameOver || paused) {
+        if (paused) {
+            // Keep drawing the static scene while paused
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawClouds();
+            drawTrees();
+            drawMonkey();
+            obstacles.forEach(obstacle => drawObstacle(obstacle.x));
+            drawScore();
+            drawPauseButton();
+        }
+        return;
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBackground();
     drawBackground();
@@ -431,6 +515,8 @@ function drawScene() {
     drawPauseButton();
     requestAnimationFrame(drawScene);
 }
+
+
 
 drawScene();
 fetchQuestion().then(() => drawScene());

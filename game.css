@@ -34,3 +34,109 @@ canvas {
     font-weight: bold;
     margin-top: 10px;
 }
+
+.popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color:#4a752c;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    text-align: center;
+    display: none;
+    z-index: 100;
+    border: 3px solid #2a570a;
+}
+
+.popup h2 {
+    color: #ebebeb;
+    margin-bottom: 30px;
+    font-size: 32px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.image-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.image-button:hover {
+    transform: scale(1.1);
+}
+
+.image-button:active {
+    transform: scale(0.95);
+}
+
+.image-button img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+/* Settings Popup Styles */
+#settingsContainer {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #4a752c(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #0c1d00(0, 0, 0, 0.5);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.setting-item label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.setting-item input[type="range"] {
+    width: 100%;
+}
+
+#saveSettings, #cancelSettings {
+    padding: 8px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#saveSettings {
+    background-color: #6fc532;
+    color: 4a752c;
+}
+
+#cancelSettings {
+    background-color: #db4338;
+    color: white;
+}

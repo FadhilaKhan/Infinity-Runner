@@ -15,3 +15,4 @@ document.getElementById('registeredUser').addEventListener('click', function() {
     // Redirect to login.php
     window.location.href = 'login.php';
 });
+
