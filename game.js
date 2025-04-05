@@ -30,7 +30,7 @@ const questionImg = document.getElementById("questionImg");
 const answerInput = document.getElementById("answerInput");
 const submitAnswer = document.getElementById("submitAnswer");
 const feedback = document.getElementById("feedback");
-
+// Load the jump sound
 const jumpSound = new Audio("music/jump.wav");
 const gameOverSound = new Audio("music/gameover.wav");
 const pauseButtonImage = new Image();
@@ -45,26 +45,14 @@ document.addEventListener("keydown", (event) => {
     if (event.code === "Space" && !isJumping && !gameOver) {
         velocityY = -14;
         isJumping = true;
-        jumpSound.play();
+        jumpSound.play(); // Play the jump sound
     }
 });
 
-// Toggle pause state when the pause button is clicked
-canvas.addEventListener("click", (event) => {
-    if (isMouseOverPauseButton(event.offsetX, event.offsetY)) {
-        paused = !paused;
-        if (paused) {
-            pauseButtonImage.src = "images/play.png"; // Change icon to play when paused
-        } else {
-            pauseButtonImage.src = "images/pause.png";
-            requestAnimationFrame(drawScene);
-        }
-    }
-});
 
-submitAnswer.disabled = true;
+submitAnswer.disabled = true; // Disable the submit button initially
 
-// Fetch a question from the Banana API
+// API Integration for fetching questions
 async function fetchQuestion() {
     try {
         const response = await fetch("https://marcconrad.com/uob/banana/api.php?out=json");
@@ -414,9 +402,29 @@ canvas.addEventListener("mousemove", (event) => {
     isPauseButtonHovered = isMouseOverPauseButton(event.offsetX, event.offsetY);
 });
 
+
+function isMouseOverPauseButton(mouseX, mouseY) {
+    return mouseX >= canvas.width - 50 && mouseX <= canvas.width - 10 && mouseY >= 10 && mouseY <= 50;
+}
+
+function drawPauseButton() {
+    const buttonSize = 50;
+    const scaleFactor = isPauseButtonHovered ? 1.1 : 1;
+    ctx.save();
+    ctx.translate(canvas.width - 70 + buttonSize / 2, 20 + buttonSize / 2);
+    ctx.scale(scaleFactor, scaleFactor);
+    ctx.drawImage(pauseButtonImage, -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize);
+    ctx.restore();
+}
+
+canvas.addEventListener("mousemove", (event) => {
+    isPauseButtonHovered = isMouseOverPauseButton(event.offsetX, event.offsetY);
+});
+
 // Main game loop: update, draw, and check collisions
 function drawScene() {
     if (gameOver || paused) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBackground();
     drawBackground();
@@ -431,6 +439,8 @@ function drawScene() {
     drawPauseButton();
     requestAnimationFrame(drawScene);
 }
+
+
 
 drawScene();
 fetchQuestion().then(() => drawScene());

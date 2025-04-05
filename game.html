@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="game.css">
 </head>
 <body>
+    
     <canvas id="gameCanvas"></canvas>
-
+    
      <!-- Question Popup -->
      <div id="questionContainer">
         <img id="questionImg" src="" alt="Question">
@@ -19,6 +20,74 @@
         <p id="feedback"></p>
     </div>
 
+    <!-- Pause Popup -->
+    <div id="pauseContainer" class="popup">
+        <h2>Game Paused</h2>
+        <div class="button-container">
+            <button id="resumeButton" class="image-button">
+                <img src="images/resume.png" alt="Resume">
+            </button>
+            <button id="restartButton" class="image-button">
+                <img src="images/restart.png" alt="Restart">
+            </button>
+            <button id="exitButton" class="image-button">
+                <img src="images/exit.png" alt="Exit">
+            </button>
+            <button id="settingsButton" class="image-button">
+                <img src="images/settings.png" alt="Settings">
+            </button>
+        </div>
+    </div>
+
+        <!-- Settings Popup -->
+    <div id="settingsContainer" class="popup">
+        <h2>Settings</h2>
+        <div class="settings-content">
+            <div class="setting-item">
+                <label for="backgroundVolume">Background Music Volume:</label>
+                <input type="range" id="backgroundVolume" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="setting-item">
+                <label for="jumpVolume">Jump Sound Volume:</label>
+                <input type="range" id="jumpVolume" min="0" max="1" step="0.1" value="1">
+            </div>
+            <div class="button-container">
+                <button id="saveSettings">Save</button>
+                <button id="cancelSettings">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize music (same as in start.js)
+        if (!window.backgroundMusic) {
+            window.backgroundMusic = new Audio('music/background music.mp3');
+            window.backgroundMusic.loop = true;
+            window.backgroundMusic.volume = 0.5;
+            
+            window.addEventListener('beforeunload', () => {
+                sessionStorage.setItem('musicTime', window.backgroundMusic.currentTime);
+                sessionStorage.setItem('musicPlaying', !window.backgroundMusic.paused);
+            });
+            
+            // Try to play
+            window.backgroundMusic.play().catch(e => {
+                document.addEventListener('click', () => {
+                    window.backgroundMusic.play();
+                }, { once: true });
+            });
+        }
+        
+        // Restore playback position
+        const savedTime = sessionStorage.getItem('musicTime');
+        if (savedTime) {
+            window.backgroundMusic.currentTime = parseFloat(savedTime);
+            const wasPlaying = sessionStorage.getItem('musicPlaying') === 'true';
+            if (wasPlaying) {
+                window.backgroundMusic.play().catch(e => console.log("Audio resume failed:", e));
+            }
+        }
+    </script>
     <script src="game.js"></script>
 </body>
 </html>
